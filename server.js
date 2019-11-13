@@ -72,7 +72,8 @@ router.route('/songs')
         var song = new Song();     
         song.title = sanitizeName(req.body.title);  
         song.artist = sanitizeName(req.body.artist);
-        song.genre = sanitizeString(req.body.genre);
+        console.log(req.body.genre);
+        song.genre = sanitizeName(req.body.genre);
        
         song.save(function(err) {
             if (err)
@@ -95,17 +96,17 @@ router.route('/song/:song_id')
     })
       .put(function(req, res) {
       
-        Item.findById(req.params.song_id, function(err, song) {
+        Song.findById(req.params.song_id, function(err, song) {
 
             if (err)
                 res.send(err);
-            if(req.body.loanPeriod != undefined){
-                song.genre =sanitizeString(req.body.genre);  // update the items info
+            if(req.body.genre != undefined){
+                song.genre =sanitizeName(req.body.genre);  // update the items info
             }
             
                 
             // save the item
-            item.save(function(err) {
+            song.save(function(err) {
                 if (err)
                     res.send(err);
 
