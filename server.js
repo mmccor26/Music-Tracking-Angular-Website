@@ -36,7 +36,7 @@ router.get('/', function(req, res) {
 
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/items');
-var Item      = require('./models/item');
+var Song     = require('./models/song');
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -56,78 +56,72 @@ router.get('/', function(req, res) {
 // more routes for our API will happen here
 
 
-router.route('/items')
+router.route('/songs')
     .get(function(req, res) {
-        Item.find(function(err, items) {
+        Song.find(function(err, songs) {
             if (err)
                 res.send(err);
 
-            res.json(items);
+            res.json(songs);
         });
     })
 
     
     .post(function(req, res) {
 
-        var item = new Item();     
-        item.name = sanitizeName(req.body.name);  
-        item.itemType = sanitizeName(req.body.itemType);
-        item.loanPeriod = sanitizeString(req.body.loanPeriod);
-        item.quantity = 1;
-        console.log(item.name);
-        console.log(item.itemType);
-        console.log(item.loanPeriod);
-    
-        item.save(function(err) {
+        var song = new Song();     
+        song.title = sanitizeName(req.body.title);  
+        song.artist = sanitizeName(req.body.artist);
+        song.genre = sanitizeString(req.body.genre);
+       
+        song.save(function(err) {
             if (err)
                 res.send(err);
 
-            res.json({ message: 'Item created!' });
+            res.json({ message: 'Song created!' });
         });
 
     });
      
-router.route('/items/:item_id')
+router.route('/song/:song_id')
 
     .get(function(req, res) {
 
-    Item.findById(req.params.item_id, function(err, item) {
+    Song.findById(req.params.song_id, function(err, song) {
             if (err)
                 res.send(err);
-            res.json(item);
+            res.json(song);
         });
     })
       .put(function(req, res) {
       
-        Item.findById(req.params.item_id, function(err, item) {
+        Item.findById(req.params.song_id, function(err, song) {
 
             if (err)
                 res.send(err);
             if(req.body.loanPeriod != undefined){
-                item.loanPeriod =sanitizeString(req.body.loanPeriod);  // update the items info
+                song.genre =sanitizeString(req.body.genre);  // update the items info
             }
-            if(req.body.quantity != undefined){
-                item.quantity = sanitizeString(req.body.quantity);  // update the items info
-            }
+            
                 
             // save the item
             item.save(function(err) {
                 if (err)
                     res.send(err);
 
-                res.json({ message: 'Item updated!' });
+                res.json({ message: 'Song updated!' });
             });
 
         });
     })
     .delete(function(req, res) {
-        Item.remove({
-            _id: req.params.item_id
-        }, function(err, item) {
+        Song.remove({
+            _id: req.params.song_id
+        }, function(err, song) {
             if (err)
                 res.send(err);
 
-            res.json({ message: 'Successfully deleted' });
+            res.json({ message: 'Successfully deleted song' });
         });
     });
     // REGISTER OUR ROUTES -------------------------------
