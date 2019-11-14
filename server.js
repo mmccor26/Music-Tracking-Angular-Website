@@ -37,6 +37,9 @@ router.get('/', function(req, res) {
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/items');
 var Song     = require('./models/song');
+var Playlist     = require('./models/playlist');
+var Review     = require('./models/review');
+var User     = require('./models/user');
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -123,6 +126,71 @@ router.route('/song/:song_id')
                 res.send(err);
 
             res.json({ message: 'Successfully deleted song' });
+        });
+    });
+router.route('/playlists')
+    .get(function(req, res) {
+        Playlist.find(function(err, playlists) {
+            if (err)
+                res.send(err);
+
+            res.json(playlists);
+        });
+    })
+    .post(function(req, res) {
+
+        var playlist = new Playlist();     
+        playlist.title = sanitizeName(req.body.title);  
+        playlist.description = sanitizeName(req.body.description);
+        console.log(req.body.genre);
+        
+       
+        playlist.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Playlist created!' });
+        });
+
+    });
+     
+router.route('/playlist/:playlist_id')
+
+    .get(function(req, res) {
+
+    Playlist.findById(req.params.playlist_id, function(err, playlist) {
+            if (err)
+                res.send(err);
+            res.json(playlist);
+        });
+    })
+      .put(function(req, res) {
+           var song;
+            Song.findById(req.body.song_id,function(err, foundSong) {
+                song = foundSong;
+            });
+      
+        Playlist.findById(req.params.playlist_id, function(err, playlist) {
+            playlist.songs.push(song)
+               
+            // save the item
+            playlist.save(function(err) {
+                if (err)
+                    res.send(err);
+
+                res.json({ message: 'Playlist updated!' });
+            });
+
+        });
+    })
+    .delete(function(req, res) {
+        Playlist.remove({
+            _id: req.params.playlist_id
+        }, function(err, song) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted playlist' });
         });
     });
     // REGISTER OUR ROUTES -------------------------------
