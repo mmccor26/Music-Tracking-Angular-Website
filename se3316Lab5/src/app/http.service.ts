@@ -14,9 +14,6 @@ export class HttpService {
 
   constructor(private http:HttpClient) { }
   
-
-  
-    
   createSong(this_title,this_artist,this_genre){
     return this.http.post('http://34.227.30.22:8080/api/songs/',
     encodeURIComponent("title")+'='+encodeURIComponent(this_title)
@@ -105,7 +102,7 @@ export class HttpService {
       });
   }
   deactivateUser(this_userid){
-    return this.http.delete('http://34.227.30.22:8080/api/user/'+
+    return this.http.put('http://3.93.82.213:8080/api/user/'+
     this_userid,
     httpOptions)
     .subscribe(

@@ -42,4 +42,5 @@ export class SitemanagerComponent implements OnInit {
     this.HttpService.deactivateUser(this.userid);
   }
 
+
 }
