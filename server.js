@@ -14,6 +14,12 @@ function sanitizeName(str) {
 var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
+const cors = require('cors');
+
+var corsOptions = {
+  origin: '*'
+};
+
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -193,6 +199,8 @@ router.route('/playlist/:playlist_id')
             res.json({ message: 'Successfully deleted playlist' });
         });
     });
+
+app.use(cors(corsOptions));
     // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/api', router);

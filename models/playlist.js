@@ -14,6 +14,10 @@ var PlaylistSchema   = new Schema({
     },
     songs:{
         type: [Schema.Types.Song] 
+    },
+    visibile:{
+        type: Boolean,
+        default:false
     }
     
 });
