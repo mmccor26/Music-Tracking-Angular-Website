@@ -9,13 +9,17 @@ import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 import { SitemanagerComponent } from './sitemanager/sitemanager.component';
 import { FormsModule } from '@angular/forms';
+import { DMCAComponent } from './dmca/dmca.component';
+import { PrivacypolicyComponent } from './privacypolicy/privacypolicy.component';
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     RegisterComponent,
     LoginComponent,
-    SitemanagerComponent
+    SitemanagerComponent,
+    DMCAComponent,
+    PrivacypolicyComponent
     
   ],
   imports: [
