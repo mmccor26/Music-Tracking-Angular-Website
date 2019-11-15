@@ -1,5 +1,5 @@
 <p>login works!</p>
-<input type="text" placeholder="Username">
+<input type="text" placeholder="Username"  [(ngModel)]="email">
 <br>
 <input type="text" placeholder="Password">
-<button>Submit</button>
+<button (click)="validateEmail()">Submit</button>
