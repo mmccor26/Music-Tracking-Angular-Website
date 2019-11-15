@@ -11,7 +11,11 @@ Add Song:
 </div>
 <button (click)="createSong()">Post Item</button>
 <br>
-
+<div class="play-container">
+    <p>
+        Song Id: <input type="text" [(ngModel)]="songid"><br>
+    </p>
+</div>
 <br>
 Modify Song Genre:
 <br>
@@ -24,11 +28,7 @@ Modify Song Genre:
 <br>
 Delete Song:
 <br>
-<div class="play-container">
-    <p>
-        Song Id: <input type="text" [(ngModel)]="songid"><br>
-    </p>
-</div>
+
 <button (click)="deleteSong()">Delete Item</button>
 
 <br>
@@ -44,16 +44,26 @@ Add Playlist:
 </div>
 <button (click)="createPlaylist()">Post Item</button>
 <br>
-Modify Playlist By Adding Song:
-<br>
-<button (click)="updatePlaylist()">Modify</button>
-<br>
-Delete Playlist:
-<br>
 <div class="play-container">
     <p>
         Playlist Id: <input type="text" [(ngModel)]="playlistid"><br>
     </p>
 </div>
-<button (click)="deletePlaylist()">Delete Item</button>
+Modify Playlist By Adding Song:
+<br>
+<button (click)="updatePlaylist()">Modify</button>
+<br>
+<br>
+Delete Playlist:
+<br>
 
+<button (click)="deletePlaylist()">Delete Item</button>
+<br>
+<br>
+Deactivate User
+<div class="play-container">
+    <p>
+        User Id: <input type="text" [(ngModel)]="playlistid"><br>
+    </p>
+</div>
+<button (click)="deactivateUser()">Deactivate User</button>

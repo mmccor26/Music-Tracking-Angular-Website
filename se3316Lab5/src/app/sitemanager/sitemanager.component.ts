@@ -15,6 +15,7 @@ export class SitemanagerComponent implements OnInit {
   songid:string='';
   playlistid:string='';
   put_genre:string='';
+  userid:string='';
   constructor(private HttpService:HttpService) { }
 
   ngOnInit() {
@@ -36,6 +37,9 @@ export class SitemanagerComponent implements OnInit {
   }
   deletePlaylist():void{
     this.HttpService.deletePlaylist(this.playlistid);
+  }
+  deactivateUser():void{
+    this.HttpService.deactivateUser(this.userid);
   }
 
 }

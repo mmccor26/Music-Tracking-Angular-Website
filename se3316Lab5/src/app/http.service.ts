@@ -104,6 +104,20 @@ export class HttpService {
       
       });
   }
+  deactivateUser(this_userid){
+    return this.http.delete('http://34.227.30.22:8080/api/user/'+
+    this_userid,
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("PUT Request is successful ", data);
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
   
   
 }
