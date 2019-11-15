@@ -199,6 +199,67 @@ router.route('/playlist/:playlist_id')
             res.json({ message: 'Successfully deleted playlist' });
         });
     });
+router.route('/users')
+    .get(function(req, res) {
+        User.find(function(err, users) {
+            if (err)
+                res.send(err);
+
+            res.json(users);
+        });
+    })
+    .post(function(req, res) {
+
+        var user = new User();     
+        user.name = sanitizeName(req.body.name);  
+        user.email = sanitizeName(req.body.email);
+        user.activated = true;
+        
+       
+        user.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'User created!' });
+        });
+
+    });
+router.route('/user/:user_id')
+
+    .get(function(req, res) {
+
+    User.findById(req.params.playlist_id, function(err, user) {
+            if (err)
+                res.send(err);
+            res.json(user);
+        });
+    })
+      .put(function(req, res) {
+           
+      
+        User.findById(req.params.user_id, function(err, user) {
+            user.activated = false;
+               
+            // save the item
+            user.save(function(err) {
+                if (err)
+                    res.send(err);
+
+                res.json({ message: 'User updated!' });
+            });
+
+        });
+    })
+    .delete(function(req, res) {
+        User.remove({
+            _id: req.params.user_id
+        }, function(err, song) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted user' });
+        });
+    });
 
 app.use(cors(corsOptions));
     // REGISTER OUR ROUTES -------------------------------
