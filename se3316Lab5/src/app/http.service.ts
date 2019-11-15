@@ -18,12 +18,11 @@ export class HttpService {
   
     
   createSong(this_title,this_artist,this_genre){
-    return this.http.post('http://'+window.location.hostname+':8080/api/songs/',
+    return this.http.post('http://34.227.30.22:8080/api/songs/',
     encodeURIComponent("title")+'='+encodeURIComponent(this_title)
     +"&"+encodeURIComponent("artist")+'='+encodeURIComponent(this_artist)
     +"&"+encodeURIComponent("genre")+'='+encodeURIComponent(this_genre),
-    httpOptions
-    )
+    httpOptions)
     .subscribe(
       data  => {
       console.log("POST Request is successful ", data);
@@ -32,12 +31,80 @@ export class HttpService {
       
       console.log("Error", error);
       
-      }
-      
-      );
-    
-    
+      });
   }
+  updateSong(this_songid,this_genre){
+    return this.http.put('http://34.227.30.22:8080/api/song/'+this_songid,
+    encodeURIComponent("genre")+'='+encodeURIComponent(this_genre),
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("PUT Request is successful ", data);
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
+  deleteSong(this_songid){
+    return this.http.delete('http://34.227.30.22:8080/api/song/'+
+    this_songid,
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("DELETE Request is successful ", data);
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
+  createPlaylist(this_title,this_description){
+    return this.http.post('http://34.227.30.22:8080/api/playlists/',
+    encodeURIComponent("title")+'='+encodeURIComponent(this_title)
+    +"&"+encodeURIComponent("description")+'='+encodeURIComponent(this_description),
+    httpOptions
+    )
+    .subscribe(
+      data  => {
+      console.log("POST Request is successful ", data);
+      },
+      error  => {
+    
+      console.log("Error", error);  
+      });
+  }
+  updatePlaylist(this_playlistid,this_songid){
+    return this.http.put('http://34.227.30.22:8080/api/playlist/'+this_playlistid,
+    encodeURIComponent("song_id")+'='+encodeURIComponent(this_songid),
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("PUT Request is successful ", data);
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
+  deletePlaylist(this_playlistid){
+    return this.http.delete('http://34.227.30.22:8080/api/playlist/'+
+    this_playlistid,
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("DELETE Request is successful ", data);
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
+  
   
 }
 
