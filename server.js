@@ -41,11 +41,45 @@ router.get('/', function(req, res) {
 
 
 var mongoose   = require('mongoose');
+
+var Song     = require('./app/song');
+var Playlist     = require('./app/playlist');
+var Review     = require('./app/review');
+var User     = require('./app/user');
+
+var nev = require('email-verification')(mongoose);
+
+
 mongoose.connect('mongodb://localhost:27017/items');
-var Song     = require('./models/song');
-var Playlist     = require('./models/playlist');
-var Review     = require('./models/review');
-var User     = require('./models/user');
+nev.configure({
+    verificationURL: 'http://184.73.70.178/api/email-verification/${URL}',
+    persistentUserModel: User,
+    tempUserCollection: 'useritems',
+ 
+    transportOptions: {
+        service: 'Gmail',
+        auth: {
+            user: 'se3316test@gmail.com',
+            pass: 'password_12345'
+        }
+    },
+    verifyMailOptions: {
+        from: 'Do Not Reply <se3316test@gmail.com>',
+        subject: 'Please confirm account',
+        html: 'Click the following link to confirm your account:</p><p>${URL}</p>',
+        text: 'Please confirm your account by clicking the following link: ${URL}'
+    }
+}, function(error, options){
+    
+});
+nev.generateTempUserModel(User, function(err, tempUserModel) {
+    if (err) {
+       console.log(err);
+       return;
+    }
+
+    console.log('generated temp user model: ' + (typeof tempUserModel === 'function'));
+  });
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -64,7 +98,32 @@ router.get('/', function(req, res) {
 
 // more routes for our API will happen here
 
+router.route("/register")
+.post(function(req,res){
+    if(!req.body.name||!req.body.email||!req.body.password){
+      //request does not have the information to make a new user
+      res.status(400).json({message:"Missing info"});
+      return;
+    }
+    let user = new User();
+    
+    user.email = req.body.email;
+    
+    user.name = req.body.name;
+    
+    user.makePassword(req.body.password);
+    //User must click link to activate account
+    user.activated = false; 
+    
+     user.save(function(err) {
+            if (err)
+                res.send(err);
 
+            res.json({ message: 'User created!' });
+        });
+    
+    
+});
 router.route('/songs')
     .get(function(req, res) {
         Song.find(function(err, songs) {
@@ -209,8 +268,44 @@ router.route('/users')
         });
     })
     .post(function(req, res) {
+        var newemail = req.body.name;
+        var newpassword = req.body.password;
+        var newname = req.body.name;
+        var newUser = User({
+            email: newemail,
+            password: newpassword,
+            name:newname
+        });
+       
+       /*nev.createTempUser(newUser, function(err, existingPersistentUser, newTempUser) {
+           console.log('hi');
+        // some sort of error
+        if (err){
+            console.log('error');// handle error...
+        }
+        // user already exists in persistent collection...
+        if (existingPersistentUser){
+            console.log('user already there');
+        }
+        // handle user's existence... violently.
+        // a new user
+        if (newTempUser) {
+            var URL = newTempUser[nev.options.URLFieldName];
+            nev.sendVerificationEmail(email, URL, function(err, info) {
+            if (err){
+                console.log('error');// handle error...
+            }
+            // flash message of success
+            });
+        }
+        // user already exists in temporary collection...
+        else {
+            console.log('error user already exists');
+        // flash message of failure...
+        }
+       });
 
-        var user = new User();     
+        */var user = new User();    
         user.name = sanitizeName(req.body.name);  
         user.email = sanitizeName(req.body.email);
         user.activated = true;

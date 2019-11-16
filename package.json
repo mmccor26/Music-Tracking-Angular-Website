@@ -18,8 +18,10 @@
   },
   "homepage": "https://github.com/mmccor26/se3316-mmccor26-lab5#readme",
   "dependencies": {
+    "argon2": "^0.25.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "email-verification": "^0.4.6",
     "express": "^4.17.1",
     "mongoose": "^5.7.10"
   }
