@@ -15,6 +15,8 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 const cors = require('cors');
+var passport     = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 
 var corsOptions = {
   origin: '*'
@@ -80,6 +82,31 @@ nev.generateTempUserModel(User, function(err, tempUserModel) {
 
     console.log('generated temp user model: ' + (typeof tempUserModel === 'function'));
   });
+
+passport.use(new LocalStrategy({
+    usernameField: 'email'
+},
+    function(username, password, done){
+        console.log('hi');
+        User.findOne({email: username}, function(err, user){
+            if(err){
+                
+                return done(err);
+            }
+            if(!user){
+                return done(null, false, {
+                    message: "User not found"
+                });
+            }
+            if(!user.validatePassword(password)){
+                return done(null, false, {
+                    message: "Password is wrong"
+                });
+            }
+            return done(null, user);
+        });
+    }
+));
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -123,6 +150,41 @@ router.route("/register")
         });
     
     
+});
+router.route('/login')
+.post(function(req,res){
+    console.log(req.body.email);
+    console.log(req.body.password);
+    
+passport.authenticate('local', function(err, user, info){
+       if(err){
+         //something went wrong
+         console.log("err");
+         res.status(404).json(err);
+         return;
+       }
+       console.log(user);
+
+       if(user){
+          if(!user.activated){
+              console.log('not activated')
+            //user has not yet visited the activation link
+            res.json({message:"account locked"});
+          }else{
+              console.log('logged in');
+            //all good
+            /*let token = user.generateJwt();
+            res.status(200).json({
+                id: user._id,
+                token: token
+             });*/
+             res.json('logged in');
+         }
+       }
+       else{
+           res.status(401).json(info);
+       }
+    })(req,res);//make sure you call the function
 });
 router.route('/songs')
     .get(function(req, res) {
@@ -191,6 +253,57 @@ router.route('/song/:song_id')
                 res.send(err);
 
             res.json({ message: 'Successfully deleted song' });
+        });
+    });
+router.route('/reviews')
+    .get(function(req, res) {
+        Review.find(function(err, reviews) {
+            if (err)
+                res.send(err);
+
+            res.json(reviews);
+        });
+    })
+
+    
+    .post(function(req, res) {
+
+        var review = new Review();     
+        review.text = sanitizeName(req.body.text);  
+        review.username = sanitizeName(req.body.username);
+        review.song_id = sanitizeName(req.body.song_id);
+        console.log(req.body.genre);
+        review.rating = req.body.rating;
+       
+        review.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Review created!' });
+        });
+
+    });
+     
+router.route('/review/:song_id')
+
+    .get(function(req, res) {
+         
+        Review.find({song_id:req.params.song_id},function(err,reviews){
+            if(err){
+                res.send(err);
+            }
+            res.json(reviews);
+        })
+    
+    })
+    .delete(function(req, res) {
+        Review.remove({
+            _id: req.params.review_id
+        }, function(err, song) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted review' });
         });
     });
 router.route('/playlists')
@@ -333,7 +446,7 @@ router.route('/user/:user_id')
            
       
         User.findById(req.params.user_id, function(err, user) {
-            user.activated = false;
+            user.activated = req.body.activated;
                
             // save the item
             user.save(function(err) {
@@ -360,6 +473,7 @@ app.use(cors(corsOptions));
     // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/api', router);
+app.use(passport.initialize());
 app.use(express.static('views'));
 
 
