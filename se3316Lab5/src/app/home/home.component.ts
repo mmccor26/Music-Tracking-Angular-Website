@@ -8,6 +8,14 @@ import { HttpService } from '../http.service';
 export class HomeComponent implements OnInit {
   songReviews:Object;
   song_id:string;
+  title:string='';
+  artist:string='';
+  genre:string;
+  rating:Number;
+  text:string='';
+  username:string='';
+  songID2:string='';
+
 
   constructor(private HttpService: HttpService) { }
 
@@ -17,8 +25,17 @@ export class HomeComponent implements OnInit {
     this.HttpService.getReviews(this.song_id).subscribe(data=>{
       this.songReviews = data;
     })
+  }
+  createSong():void{
+    if(this.title===''||this.artist===''){
+      alert("Fill in the needed parameters");
+      return;
 
-    
+    }
+    this.HttpService.createSong(this.title,this.artist,this.genre);
+  }
+  createReview():void{
+    this.HttpService.createReview(this.username,this.text,this.rating,this.songID2);
   }
 
 }
