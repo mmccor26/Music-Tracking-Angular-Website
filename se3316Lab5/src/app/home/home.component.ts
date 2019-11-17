@@ -11,6 +11,11 @@ export class HomeComponent implements OnInit {
   title:string='';
   artist:string='';
   genre:string;
+  rating:Number;
+  text:string='';
+  username:string='';
+  songID2:string='';
+
 
   constructor(private HttpService: HttpService) { }
 
@@ -28,6 +33,9 @@ export class HomeComponent implements OnInit {
 
     }
     this.HttpService.createSong(this.title,this.artist,this.genre);
+  }
+  createReview():void{
+    this.HttpService.createReview(this.username,this.text,this.rating,this.songID2);
   }
 
 }

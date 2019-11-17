@@ -34,3 +34,17 @@ Add Song:
     </p>
 </div>
 <button (click)="createSong()">Post Item</button>
+
+Add Review:
+<div class="play-container">
+  <p>
+      Song ID: <input type="text" [(ngModel)]="songID2"><br>
+
+      Text: <input type="text" [(ngModel)]="text"><br>
+     
+      Rating: <input type="number" [(ngModel)]="rating"><br>
+    
+      Username: <input type="text" [(ngModel)]="username"><br>
+  </p>
+</div>
+<button (click)="createReview()">Post Item</button>

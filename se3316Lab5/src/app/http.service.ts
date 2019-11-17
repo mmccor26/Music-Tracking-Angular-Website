@@ -30,6 +30,24 @@ export class HttpService {
       
       });
   }
+  createReview(username,text,rating,songid){
+    return this.http.post('http://34.239.102.41:8080/api/reviews/',
+    encodeURIComponent("username")+'='+encodeURIComponent(username)
+    +"&"+encodeURIComponent("text")+'='+encodeURIComponent(text)
+    +"&"+encodeURIComponent("rating")+'='+encodeURIComponent(rating)
+    +"&"+encodeURIComponent("song_id")+'='+encodeURIComponent(songid),
+
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("POST Request is successful ", data);
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
   updateSong(this_songid,this_genre){
     return this.http.put('http://34.227.30.22:8080/api/song/'+this_songid,
     encodeURIComponent("genre")+'='+encodeURIComponent(this_genre),
