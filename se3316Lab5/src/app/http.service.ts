@@ -15,7 +15,7 @@ export class HttpService {
   constructor(private http:HttpClient) { }
   
   createSong(this_title,this_artist,this_genre){
-    return this.http.post('http://34.227.30.22:8080/api/songs/',
+    return this.http.post('http://34.239.102.41:8080/api/songs/',
     encodeURIComponent("title")+'='+encodeURIComponent(this_title)
     +"&"+encodeURIComponent("artist")+'='+encodeURIComponent(this_artist)
     +"&"+encodeURIComponent("genre")+'='+encodeURIComponent(this_genre),

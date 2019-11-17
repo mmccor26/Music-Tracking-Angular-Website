@@ -8,6 +8,9 @@ import { HttpService } from '../http.service';
 export class HomeComponent implements OnInit {
   songReviews:Object;
   song_id:string;
+  title:string;
+  artist:string;
+  genre:string;
 
   constructor(private HttpService: HttpService) { }
 
@@ -17,8 +20,9 @@ export class HomeComponent implements OnInit {
     this.HttpService.getReviews(this.song_id).subscribe(data=>{
       this.songReviews = data;
     })
-
-    
+  }
+  createSong():void{
+    this.HttpService.createSong(this.title,this.artist,this.genre);
   }
 
 }

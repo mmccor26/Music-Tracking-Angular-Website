@@ -21,3 +21,16 @@ Find All Reviews For A Song:
           
         </li>
 </ul>
+
+Add Song:
+<br>
+<div class="play-container">
+    <p>
+        Title: <input type="text" [(ngModel)]="title"><br>
+       
+        Artist: <input type="text" [(ngModel)]="artist"><br>
+      
+        Genre: <input type="text" [(ngModel)]="genre"><br>
+    </p>
+</div>
+<button (click)="createSong()">Post Item</button>
