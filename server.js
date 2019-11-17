@@ -17,6 +17,7 @@ var bodyParser = require('body-parser');
 const cors = require('cors');
 var passport     = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var mailer = require('./config/nodemailer');
 
 var corsOptions = {
   origin: '*'
@@ -148,6 +149,7 @@ router.route("/register")
 
             res.json({ message: 'User created!' });
         });
+        mailer.sendMail(user.email)
     
     
 });
@@ -212,6 +214,18 @@ router.route('/songs')
             res.json({ message: 'Song created!' });
         });
 
+    });
+router.route('/song/:keyword')
+    .get(function(req, res) {
+        Song.find({$or:[{title:req.params.keyword},
+            {artist:req.params.keyword},
+            {genre:req.params.keyword}]},
+            function(err, songs) {
+                
+                res.json(songs);
+                
+            })
+        
     });
      
 router.route('/song/:song_id')
