@@ -15,6 +15,7 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 const cors = require('cors');
+const Fuse = require('fuse.js');
 var passport     = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var mailer = require('./config/nodemailer');
@@ -22,7 +23,19 @@ var mailer = require('./config/nodemailer');
 var corsOptions = {
   origin: '*'
 };
-
+var fuseOptions = {
+  shouldSort: true,
+  threshold: 0.4,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: [
+    "title",
+    "genre",
+    "artist"
+  ]
+};
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -217,14 +230,20 @@ router.route('/songs')
     });
 router.route('/song/:keyword')
     .get(function(req, res) {
-        Song.find({$or:[{title:req.params.keyword},
+        /*Song.find({$or:[{title:req.params.keyword},
             {artist:req.params.keyword},
             {genre:req.params.keyword}]},
             function(err, songs) {
                 
                 res.json(songs);
                 
-            })
+            })*/
+        Song.find(function(err, songs) {
+            var fuse = new Fuse(songs,fuseOptions)
+            res.json(fuse.search(req.params.keyword));
+            
+            
+        })
         
     });
      
