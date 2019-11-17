@@ -6,9 +6,18 @@
 
 <div>Top 10 List</div>
 
-Search Songs: <input type="text" id="songKeyword" placeholder="Keyword">
-<button>Search</button>
-
+Search Songs: <input type="text" id="songKeyword" placeholder="Keyword" [(ngModel)]="keyword">
+<button (click)="searchSong()">Search</button>
+<ul *ngIf="songs">
+  <li *ngFor="let songs of songs">
+    <p class="name">Title: {{ songs.title }}</p>
+    <p class="name">Artist: {{ songs.artist }}</p>
+    <p class="name">Genre: {{ songs.genre }}</p>
+    
+    
+  </li>
+</ul>
+<br>
 Find All Reviews For A Song:
 <input type="text" [(ngModel)]="song_id">
 <button (click)="getReviews()">Find Reviews</button>

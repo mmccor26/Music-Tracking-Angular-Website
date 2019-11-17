@@ -136,6 +136,10 @@ export class HttpService {
   getReviews(song_id){
     return this.http.get('http://184.73.70.178:8080/api/review/'+song_id);
   }
+  searchSongs(keyword){
+    return this.http.get('http://34.239.102.41:8080/api/song/'+keyword);
+  }
+
   
   
 }
