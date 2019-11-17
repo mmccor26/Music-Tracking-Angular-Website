@@ -26,6 +26,7 @@ import { PrivacypolicyComponent } from './privacypolicy/privacypolicy.component'
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    
     HttpClientModule
   ],
   providers: [],

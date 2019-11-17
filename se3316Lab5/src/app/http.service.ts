@@ -115,6 +115,9 @@ export class HttpService {
       
       });
   }
+  getReviews(song_id){
+    return this.http.get('http://184.73.70.178:8080/api/review/'+song_id);
+  }
   
   
 }
