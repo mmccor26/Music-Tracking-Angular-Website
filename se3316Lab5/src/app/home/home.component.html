@@ -8,3 +8,16 @@
 
 Search Songs: <input type="text" id="songKeyword" placeholder="Keyword">
 <button>Search</button>
+
+Find All Reviews For A Song:
+<input type="text" [(ngModel)]="song_id">
+<button (click)="getReviews()">Find Reviews</button>
+<ul *ngIf="songReviews">
+        <li *ngFor="let songReviews of songReviews">
+          <p class="name">Name: {{ songReviews.username }}</p>
+          <p class="name">Text: {{ songReviews.text }}</p>
+          <p class="name">Rating: {{ songReviews.rating }}</p>
+          
+          
+        </li>
+</ul>
