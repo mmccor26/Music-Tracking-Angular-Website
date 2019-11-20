@@ -36,6 +36,7 @@ UserSchema.methods.makePassword = function(pwd){
 UserSchema.methods.generateAuthToken = function(){
     const token = jwt.sign({_id:this._id,isAdmin:this.sitemanager},
     config.get('myprivatekey'));
+    console.log(token.sitemanager);
     return token;
 }
 module.exports = mongoose.model('User', UserSchema);

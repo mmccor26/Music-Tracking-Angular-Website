@@ -17,6 +17,7 @@ var bodyParser = require('body-parser');
 const cors = require('cors');
 const Fuse = require('fuse.js');
 const auth = require('./middleware/auth');
+const AuthAdmin = require('./middleware/AuthAdmin');
 
 const config = require("config");
 var passport     = require('passport');
@@ -164,6 +165,7 @@ router.route("/register")
     user.makePassword(req.body.password);
     //User must click link to activate account
     user.activated = false; 
+    user.sitemanager = false;
     
      user.save(function(err) {
             if (err)
@@ -173,7 +175,6 @@ router.route("/register")
         });
         mailer.sendMail(user.email)
     
-    
 });
 router.route('/login')
 .post(function(req,res){
@@ -181,6 +182,8 @@ router.route('/login')
     console.log(req.body.password);
     
 passport.authenticate('local', function(err, user, info){
+        console.log(info);
+
        if(err){
          //something went wrong
          console.log("err");
@@ -192,16 +195,20 @@ passport.authenticate('local', function(err, user, info){
        if(user){
           if(!user.activated){
               console.log('not activated')
+              
             //user has not yet visited the activation link
             res.json({message:"account locked"});
           }else{
               console.log('logged in');
               const token = user.generateAuthToken();
               console.log(token);
+              console.log(token.isAdmin);
+              console.log(user.sitemanager);
                 res.header("authorization", token).send({
                 _id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                sitemanager: user.sitemanager
                 });
          }
        }
@@ -219,8 +226,6 @@ router.route('/songs')
             res.json(songs);
         });
     })
-
-    
     .post(function(req, res) {
 
         var song = new Song();     
@@ -260,15 +265,12 @@ router.route('/song/:keyword')
             {artist:req.params.keyword},
             {genre:req.params.keyword}]},
             function(err, songs) {
-                
                 res.json(songs);
-                
             })*/
         Song.find(function(err, songs) {
             var fuse = new Fuse(songs,fuseOptions)
             res.json(fuse.search(req.params.keyword));
-            
-            
+        
         })
         
     });
@@ -327,8 +329,6 @@ router.route('/reviews')
             res.json(reviews);
         });
     })
-
-    
     .post(function(req, res) {
 
         var review = new Review();     
@@ -448,7 +448,7 @@ router.route('/playlist/:playlist_id')
     });
 
 router.route('/users')
-    .get(auth,function(req, res) {
+    .get(AuthAdmin,function(req, res) {
         User.find(function(err, users) {
             if (err)
                 res.send(err);
@@ -522,7 +522,19 @@ router.route('/user/:user_id')
            
       
         User.findById(req.params.user_id, function(err, user) {
-            user.activated = req.body.activated;
+            if(user.activated!=null){
+                user.activated = req.body.activated;
+        
+            }
+            user.activated=true;
+            if(user.sitemanager!=null){
+                
+                user.sitemanager = req.body.sitemanager;
+                
+            }
+            
+            
+            
                
             // save the item
             user.save(function(err) {
