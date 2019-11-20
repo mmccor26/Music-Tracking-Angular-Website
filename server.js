@@ -16,6 +16,9 @@ var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 const cors = require('cors');
 const Fuse = require('fuse.js');
+const auth = require('./middleware/auth');
+
+const config = require("config");
 var passport     = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var mailer = require('./config/nodemailer');
@@ -28,7 +31,7 @@ var fuseOptions = {
   threshold: 0.4,
   location: 0,
   distance: 100,
-  maxPatternLength: 32,
+  maxPatternLength: 32, //Settings for soft matched search
   minMatchCharLength: 1,
   keys: [
     "title",
@@ -36,6 +39,11 @@ var fuseOptions = {
     "artist"
   ]
 };
+if (!config.get("myprivatekey")) {
+  console.error("FATAL ERROR: myprivatekey is not defined.");
+  process.exit(1);
+}
+console.log(config.get("myprivatekey"));
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -121,10 +129,11 @@ passport.use(new LocalStrategy({
         });
     }
 ));
+
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
-
+app.use('/api', router);
 // middleware to use for all requests
 router.use(function(req, res, next) {
     // do logging
@@ -187,13 +196,13 @@ passport.authenticate('local', function(err, user, info){
             res.json({message:"account locked"});
           }else{
               console.log('logged in');
-            //all good
-            /*let token = user.generateJwt();
-            res.status(200).json({
-                id: user._id,
-                token: token
-             });*/
-             res.json('logged in');
+              const token = user.generateAuthToken();
+              console.log(token);
+                res.header("authorization", token).send({
+                _id: user._id,
+                name: user.name,
+                email: user.email
+                });
          }
        }
        else{
@@ -218,8 +227,25 @@ router.route('/songs')
         song.title = sanitizeName(req.body.title);  
         song.artist = sanitizeName(req.body.artist);
         console.log(req.body.genre);
-        song.genre = sanitizeName(req.body.genre);
-       
+        
+        song.header = "TAG";
+        if(req.body.genre !=null){
+            song.genre = req.body.genre;
+        }
+        if(req.body.album !=null){
+            song.album = req.body.album;
+        }
+        console.log(req.body.songcomment);
+    
+        if(req.body.songcomment !=null){
+            song.songcomment = req.body.songcomment;
+        }
+        console.log(song.songcomment);
+        if(req.body.year !=null){
+            song.year = req.body.year;
+        }
+        
+        
         song.save(function(err) {
             if (err)
                 res.send(err);
@@ -288,6 +314,10 @@ router.route('/song/:song_id')
             res.json({ message: 'Successfully deleted song' });
         });
     });
+router.route('/songlist')
+.get(function(req, res) {
+    
+})
 router.route('/reviews')
     .get(function(req, res) {
         Review.find(function(err, reviews) {
@@ -331,7 +361,7 @@ router.route('/review/:song_id')
     })
     .delete(function(req, res) {
         Review.remove({
-            _id: req.params.review_id
+            _id: req.params.song_id
         }, function(err, song) {
             if (err)
                 res.send(err);
@@ -339,6 +369,18 @@ router.route('/review/:song_id')
             res.json({ message: 'Successfully deleted review' });
         });
     });
+router.route('/review/:song_id')
+.delete(function(req,res){
+    Review.remove({
+            _id: req.params.review_id
+        }, function(err, song) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted review' });
+        });
+    
+})
 router.route('/playlists')
     .get(function(req, res) {
         Playlist.find(function(err, playlists) {
@@ -404,8 +446,9 @@ router.route('/playlist/:playlist_id')
             res.json({ message: 'Successfully deleted playlist' });
         });
     });
+
 router.route('/users')
-    .get(function(req, res) {
+    .get(auth,function(req, res) {
         User.find(function(err, users) {
             if (err)
                 res.send(err);
@@ -505,7 +548,7 @@ router.route('/user/:user_id')
 app.use(cors(corsOptions));
     // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
-app.use('/api', router);
+
 app.use(passport.initialize());
 app.use(express.static('views'));
 
