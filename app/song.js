@@ -32,6 +32,18 @@ var SongSchema   = new Schema({
     year:{
         type:Number,
         max:9999
+    },
+    hidden:{
+        type:Boolean,
+        required:true
+    },
+    numberofratings:{
+        type:Number,
+        required:true
+    },
+    avgrating:{
+        type:Number,
+        required:true
     }
 });
 

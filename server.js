@@ -22,11 +22,13 @@ const AuthAdmin = require('./middleware/AuthAdmin');
 const config = require("config");
 var passport     = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var mailer = require('./config/nodemailer');
 
 var corsOptions = {
   origin: '*'
 };
+app.use(cors(corsOptions));
 var fuseOptions = {
   shouldSort: true,
   threshold: 0.4,
@@ -37,7 +39,9 @@ var fuseOptions = {
   keys: [
     "title",
     "genre",
-    "artist"
+    "artist",
+    "album",
+    "year"
   ]
 };
 if (!config.get("myprivatekey")) {
@@ -76,35 +80,19 @@ var nev = require('email-verification')(mongoose);
 
 
 mongoose.connect('mongodb://localhost:27017/items');
-nev.configure({
-    verificationURL: 'http://184.73.70.178/api/email-verification/${URL}',
-    persistentUserModel: User,
-    tempUserCollection: 'useritems',
- 
-    transportOptions: {
-        service: 'Gmail',
-        auth: {
-            user: 'se3316test@gmail.com',
-            pass: 'password_12345'
-        }
-    },
-    verifyMailOptions: {
-        from: 'Do Not Reply <se3316test@gmail.com>',
-        subject: 'Please confirm account',
-        html: 'Click the following link to confirm your account:</p><p>${URL}</p>',
-        text: 'Please confirm your account by clicking the following link: ${URL}'
-    }
-}, function(error, options){
-    
-});
-nev.generateTempUserModel(User, function(err, tempUserModel) {
-    if (err) {
-       console.log(err);
-       return;
-    }
 
-    console.log('generated temp user model: ' + (typeof tempUserModel === 'function'));
-  });
+passport.use(new FacebookStrategy({
+    clientID:3058313284185519,
+    clientSecret:'2f7a6c18c8ff4cca35ef293c3c5a7991',
+    callbackURL:"http://localhost:8080/facebook/login"
+    
+},
+function(accessToken,refreshToken,profile,cb){
+    
+    return cb(null,profile);
+    
+}
+));
 
 passport.use(new LocalStrategy({
     usernameField: 'email'
@@ -159,9 +147,7 @@ router.route("/register")
     let user = new User();
     
     user.email = req.body.email;
-    
     user.name = req.body.name;
-    
     user.makePassword(req.body.password);
     //User must click link to activate account
     user.activated = false; 
@@ -173,7 +159,7 @@ router.route("/register")
 
             res.json({ message: 'User created!' });
         });
-        mailer.sendMail(user.email)
+        mailer.sendMail(user.email,`http://18.212.196.17:8080/api/user/activate/${user._id}`);
     
 });
 router.route('/login')
@@ -186,12 +172,10 @@ passport.authenticate('local', function(err, user, info){
 
        if(err){
          //something went wrong
-         console.log("err");
          res.status(404).json(err);
          return;
        }
        console.log(user);
-
        if(user){
           if(!user.activated){
               console.log('not activated')
@@ -217,12 +201,26 @@ passport.authenticate('local', function(err, user, info){
        }
     })(req,res);//make sure you call the function
 });
+router.route('/facebook/login')
+.post(function(req,res){
+    
+    console.log(req.body.email);
+    console.log(req.body.password);
+    
+passport.authenticate('facebook',
+  function(req, res) {
+      console.log('success');
+    res.redirect('/');
+      
+  })
+});
 router.route('/songs')
     .get(function(req, res) {
-        Song.find(function(err, songs) {
-            if (err)
-                res.send(err);
-
+        Song
+        .find()
+        .sort({avgrating:-1})
+        .limit(10)
+        .exec(function(err, songs) {
             res.json(songs);
         });
     })
@@ -232,7 +230,8 @@ router.route('/songs')
         song.title = sanitizeName(req.body.title);  
         song.artist = sanitizeName(req.body.artist);
         console.log(req.body.genre);
-        
+        song.numberofratings = 0;
+        song.avgrating = 0;
         song.header = "TAG";
         if(req.body.genre !=null){
             song.genre = req.body.genre;
@@ -249,7 +248,7 @@ router.route('/songs')
         if(req.body.year !=null){
             song.year = req.body.year;
         }
-        
+        song.hidden = false;
         
         song.save(function(err) {
             if (err)
@@ -267,8 +266,13 @@ router.route('/song/:keyword')
             function(err, songs) {
                 res.json(songs);
             })*/
+        
         Song.find(function(err, songs) {
-            var fuse = new Fuse(songs,fuseOptions)
+            var filteredSongs = songs.filter(function(i) {
+                return i.hidden === false;
+            });
+            
+            var fuse = new Fuse(filteredSongs,fuseOptions)
             res.json(fuse.search(req.params.keyword));
         
         })
@@ -316,10 +320,7 @@ router.route('/song/:song_id')
             res.json({ message: 'Successfully deleted song' });
         });
     });
-router.route('/songlist')
-.get(function(req, res) {
-    
-})
+
 router.route('/reviews')
     .get(function(req, res) {
         Review.find(function(err, reviews) {
@@ -337,6 +338,22 @@ router.route('/reviews')
         review.song_id = sanitizeName(req.body.song_id);
         console.log(req.body.genre);
         review.rating = req.body.rating;
+        Song.findById(review.song_id,function(err, song) {
+            
+            song.numberofratings +=1;
+            console.log("current average "+song.avgrating);
+            console.log("current avg time number of ratings "+song.numberofratings*song.avgrating);
+            console.log("new ratings "+req.body.rating);
+            var sum = (song.avgrating*(song.numberofratings-1))+(+req.body.rating);
+            
+            song.avgrating = ((song.avgrating*(song.numberofratings-1)) + (+req.body.rating)) /song.numberofratings;
+            song.save(function(err){
+               if(err){
+                   res.send(err);
+               }
+               console.log("Number of ratings incremented");
+           })
+        });
        
         review.save(function(err) {
             if (err)
@@ -380,72 +397,7 @@ router.route('/review/:song_id')
             res.json({ message: 'Successfully deleted review' });
         });
     
-})
-router.route('/playlists')
-    .get(function(req, res) {
-        Playlist.find(function(err, playlists) {
-            if (err)
-                res.send(err);
-
-            res.json(playlists);
-        });
-    })
-    .post(function(req, res) {
-
-        var playlist = new Playlist();     
-        playlist.title = sanitizeName(req.body.title);  
-        playlist.description = sanitizeName(req.body.description);
-        console.log(req.body.genre);
-        
-       
-        playlist.save(function(err) {
-            if (err)
-                res.send(err);
-
-            res.json({ message: 'Playlist created!' });
-        });
-
-    });
-     
-router.route('/playlist/:playlist_id')
-
-    .get(function(req, res) {
-
-    Playlist.findById(req.params.playlist_id, function(err, playlist) {
-            if (err)
-                res.send(err);
-            res.json(playlist);
-        });
-    })
-      .put(function(req, res) {
-           var song;
-            Song.findById(req.body.song_id,function(err, foundSong) {
-                song = foundSong;
-            });
-      
-        Playlist.findById(req.params.playlist_id, function(err, playlist) {
-            playlist.songs.push(song)
-               
-            // save the item
-            playlist.save(function(err) {
-                if (err)
-                    res.send(err);
-
-                res.json({ message: 'Playlist updated!' });
-            });
-
-        });
-    })
-    .delete(function(req, res) {
-        Playlist.remove({
-            _id: req.params.playlist_id
-        }, function(err, song) {
-            if (err)
-                res.send(err);
-
-            res.json({ message: 'Successfully deleted playlist' });
-        });
-    });
+});
 
 router.route('/users')
     .get(AuthAdmin,function(req, res) {
@@ -466,35 +418,8 @@ router.route('/users')
             name:newname
         });
        
-       /*nev.createTempUser(newUser, function(err, existingPersistentUser, newTempUser) {
-           console.log('hi');
-        // some sort of error
-        if (err){
-            console.log('error');// handle error...
-        }
-        // user already exists in persistent collection...
-        if (existingPersistentUser){
-            console.log('user already there');
-        }
-        // handle user's existence... violently.
-        // a new user
-        if (newTempUser) {
-            var URL = newTempUser[nev.options.URLFieldName];
-            nev.sendVerificationEmail(email, URL, function(err, info) {
-            if (err){
-                console.log('error');// handle error...
-            }
-            // flash message of success
-            });
-        }
-        // user already exists in temporary collection...
-        else {
-            console.log('error user already exists');
-        // flash message of failure...
-        }
-       });
 
-        */var user = new User();    
+        var user = new User();    
         user.name = sanitizeName(req.body.name);  
         user.email = sanitizeName(req.body.email);
         user.activated = true;
@@ -508,6 +433,22 @@ router.route('/users')
         });
 
     });
+router.route('/user/activate/:user_id')
+.get(function(req,res){
+    User.findById(req.params.user_id,function(err,user){
+        if(user.activated==false){
+            user.activated=true;
+            user.save(function(err){
+                if(err){
+                    res.status(405).json(err);
+                }
+                else{
+                    res.json("account activated!");
+                }
+            });
+        }
+    });
+});
 router.route('/user/:user_id')
 
     .get(function(req, res) {
@@ -530,12 +471,8 @@ router.route('/user/:user_id')
             if(user.sitemanager!=null){
                 
                 user.sitemanager = req.body.sitemanager;
-                
             }
             
-            
-            
-               
             // save the item
             user.save(function(err) {
                 if (err)
@@ -556,8 +493,22 @@ router.route('/user/:user_id')
             res.json({ message: 'Successfully deleted user' });
         });
     });
+    
+router.route('/admin/song/:song_id')
+.put(function(req,res){
+    Song.findById(req.params.song_id,function(err, song) {
+        song.hidden= !song.hidden;
+        song.save(function(err) {
+                if (err)
+                    res.send(err);
 
-app.use(cors(corsOptions));
+                res.json({ message: 'Song updated!' });
+            });
+    })
+    
+});
+
+
     // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 
