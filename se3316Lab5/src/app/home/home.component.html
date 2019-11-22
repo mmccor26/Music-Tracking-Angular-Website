@@ -5,6 +5,14 @@
 <a routerLink="/PrivacyPolicy"><button> Privacy Policy</button></a>
 
 <div>Top 10 List</div>
+<ul *ngIf="songList">
+  <li *ngFor="let songList of songList">
+    <p class="name">ID: {{ songList._id }}</p>
+    <p class="name">Name: {{ songList.title }}</p>
+    <p class="name">Text: {{ songList.artist }}</p>
+    <p class="name">Rating: {{ songList.avgrating }}</p>
+  </li>
+</ul>
 
 Search Songs: <input type="text" id="songKeyword" placeholder="Keyword" [(ngModel)]="keyword">
 <button (click)="searchSong()">Search</button>
@@ -40,6 +48,9 @@ Add Song:
         Artist: <input type="text" [(ngModel)]="artist"><br>
       
         Genre: <input type="text" [(ngModel)]="genre"><br>
+        Album: <input type="text" [(ngModel)]="album"><br>
+        Commet: <input type="text" [(ngModel)]="comment"><br>
+        Year: <input type="text" [(ngModel)]="year"><br>
     </p>
 </div>
 <button (click)="createSong()">Post Item</button>

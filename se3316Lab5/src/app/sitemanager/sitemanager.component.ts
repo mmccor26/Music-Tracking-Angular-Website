@@ -20,23 +20,14 @@ export class SitemanagerComponent implements OnInit {
 
   ngOnInit() {
   }
-  createSong():void{
+  /*createSong():void{
     this.HttpService.createSong(this.title,this.artist,this.genre);
-  }
+  }*/
   updateSong():void{
     this.HttpService.updateSong(this.songid,this.put_genre);
   }
   deleteSong():void{
     this.HttpService.deleteSong(this.songid);
-  }
-  createPlaylist():void{
-    this.HttpService.createPlaylist(this.pTitle,this.description);
-  }
-  updatePlaylist():void{
-    this.HttpService.updatePlaylist(this.playlistid,this.songid);
-  }
-  deletePlaylist():void{
-    this.HttpService.deletePlaylist(this.playlistid);
   }
   deactivateUser():void{
     this.HttpService.deactivateUser(this.userid);
