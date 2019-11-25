@@ -20,16 +20,11 @@ export class SitemanagerComponent implements OnInit {
 
   ngOnInit() {
   }
-  /*createSong():void{
-    this.HttpService.createSong(this.title,this.artist,this.genre);
-  }*/
+  
   updateSong():void{
-    this.HttpService.updateSong(this.songid,this.put_genre);
+    this.HttpService.updateSong(this.songid);
   }
-  deleteSong():void{
-    this.HttpService.deleteSong(this.songid);
-  }
-  deactivateUser():void{
+  toggleUser():void{
     this.HttpService.deactivateUser(this.userid);
   }
 

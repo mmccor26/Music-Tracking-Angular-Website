@@ -10,7 +10,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class HttpService {
-  url:string='http://3.82.99.92:8080/api';
+  url:string='http://18.233.97.184:8080/api';
 
 
   constructor(private http:HttpClient) { }
@@ -52,9 +52,8 @@ export class HttpService {
       
       });
   }
-  updateSong(this_songid,this_genre){
-    return this.http.put(this.url+'/song/'+this_songid,
-    encodeURIComponent("genre")+'='+encodeURIComponent(this_genre),
+  updateSong(this_songid){
+    return this.http.put(this.url+'/admin/song/'+this_songid,
     httpOptions)
     .subscribe(
       data  => {

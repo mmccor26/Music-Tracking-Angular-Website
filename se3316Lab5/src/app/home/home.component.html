@@ -6,65 +6,79 @@
 
 <div>Top 10 List</div>
 <ul *ngIf="songList">
-  <li *ngFor="let songList of songList">
+  <li *ngFor="let songList of songList;index as i">
     <p class="name">ID: {{ songList._id }}</p>
     <p class="name">Name: {{ songList.title }}</p>
     <p class="name">Text: {{ songList.artist }}</p>
-    <p class="name">Rating: {{ songList.avgrating }}</p>
+    <p class="name"> Average Rating: {{ songList.avgrating }}</p><button (click)="listToggle[i]=true">+</button>
+    <p *ngIf="listToggle[i]">Year: {{songList.album}}</p>
+    <p *ngIf="listToggle[i]">Number of Ratings: {{songList.numberofratings}}</p>
+    <p *ngIf="listToggle[i]">Genre: {{songList.genre}}</p>
+    <p *ngIf="listToggle[i]">Year: {{songList.album}}</p>
+    <p *ngIf="listToggle[i] && songList.lastreview[0]">Last Reviewer: {{songList.lastreview[0].username}}</p>
+    <p *ngIf="listToggle[i] && songList.lastreview[0]">Comment: {{songList.lastreview[0].text}}</p>
+    <p *ngIf="listToggle[i] && songList.lastreview[0]">Rating: {{songList.lastreview[0].rating}}</p>
+  
   </li>
 </ul>
 
 Search Songs: <input type="text" id="songKeyword" placeholder="Keyword" [(ngModel)]="keyword">
 <button (click)="searchSong()">Search</button>
 <ul *ngIf="songs">
-  <li *ngFor="let songs of songs">
+  <li *ngFor="let songs of songs ; index as i">
+    <p class="name">ID: {{ songs._id }}</p>
     <p class="name">Title: {{ songs.title }}</p>
     <p class="name">Artist: {{ songs.artist }}</p>
-    <p class="name">Genre: {{ songs.genre }}</p>
+    <p class="name">Rating: {{ songs.avgrating }}</p><button (click)="songsToggle[i]=true">+</button>
+    <p *ngIf="songsToggle[i]">Year: {{songs.year}}</p>
+    <p *ngIf="songsToggle[i]">Number of Ratings: {{songs.numberofratings}}</p>
+    <p *ngIf="songsToggle[i]">Genre: {{songs.genre}}</p>
+    <p *ngIf="songsToggle[i]">Album: {{songs.album}}</p>
+    <p *ngIf="songsToggle[i] && songs.lastreview[0]">Last Reviewer: {{songs.lastreview[0].username}}</p>
+    <p *ngIf="songsToggle[i] && songs.lastreview[0]">Comment: {{songs.lastreview[0].text}}</p>
+    <p *ngIf="songsToggle[i] && songs.lastreview[0]">Rating: {{songs.lastreview[0].rating}}</p>
+    
+
     
     
   </li>
 </ul>
 <br>
 Find All Reviews For A Song:
-<input type="text" [(ngModel)]="song_id">
+<input type="text" [(ngModel)]="song_id" placeholder="Song ID">
 <button (click)="getReviews()">Find Reviews</button>
 <ul *ngIf="songReviews">
         <li *ngFor="let songReviews of songReviews">
           <p class="name">Name: {{ songReviews.username }}</p>
           <p class="name">Text: {{ songReviews.text }}</p>
           <p class="name">Rating: {{ songReviews.rating }}</p>
-          
-          
         </li>
 </ul>
 
-Add Song:
+
 <br>
-<div class="play-container">
+<div class="play-container" *ngIf="loggedIn=='true'">
+    Add Song:
     <p>
         Title: <input type="text" [(ngModel)]="title"><br>
-       
         Artist: <input type="text" [(ngModel)]="artist"><br>
-      
         Genre: <input type="text" [(ngModel)]="genre"><br>
         Album: <input type="text" [(ngModel)]="album"><br>
-        Commet: <input type="text" [(ngModel)]="comment"><br>
+        Comment: <input type="text" [(ngModel)]="comment"><br>
         Year: <input type="text" [(ngModel)]="year"><br>
     </p>
+    <button (click)="createSong()">Post Song</button>
 </div>
-<button (click)="createSong()">Post Item</button>
 
-Add Review:
-<div class="play-container">
+
+
+<div class="play-container" *ngIf="loggedIn=='true'">
+    Add Review:
   <p>
       Song ID: <input type="text" [(ngModel)]="songID2"><br>
-
       Text: <input type="text" [(ngModel)]="text"><br>
-     
       Rating: <input type="number" [(ngModel)]="rating"><br>
-    
       Username: <input type="text" [(ngModel)]="username"><br>
   </p>
+  <button (click)="createReview()">Post Review</button>
 </div>
-<button (click)="createReview()">Post Item</button>

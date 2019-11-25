@@ -1,1 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
+html{
+    
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: aliceblue;
+}
+div,li,button{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+ul {
+    margin-left: 1em;
+    margin-right: 1em;
+    padding: 1em;
+    flex-wrap: wrap;
+    display: flex;
+
+}
+li{
+    padding: 1em;
+    list-style-type:none;
+    border: 5px solid  rgb(94, 94, 179);
+    background-color: #5cffbb;
+
+}

@@ -6,8 +6,11 @@ import { HttpService } from '../http.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+  loggedIn:string=localStorage.getItem('loggedIn');
   songReviews:Object;
   songs:Object;
+  listToggle:any={};
+  songsToggle:any={};
   song_id:string;
   title:string='';
   artist:string='';

@@ -16,6 +16,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class EmailvalidationService {
+  url:string='http://18.233.97.184:8080/api';
 
   constructor(private http:HttpClient) { }
   validateEmail(email,password){
@@ -24,14 +25,30 @@ export class EmailvalidationService {
       return;
     }
     
-    return this.http.post('http://184.73.70.178:8080/api/login',
+    return this.http.post(this.url+'/login',
       encodeURIComponent("email")+'='+encodeURIComponent(email)
       +"&"+encodeURIComponent("password")+'='+encodeURIComponent(password),
       httpOptions
       )
       
-    }
-
   }
+  registerUser(email,password){
+    if (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)=== false){
+      alert("You have entered an invalid email address!");
+      return;
+    }
+    
+    return this.http.post(this.url+'/register',
+      encodeURIComponent("email")+'='+encodeURIComponent(email)
+      +"&"+encodeURIComponent("password")+'='+encodeURIComponent(password),
+      httpOptions
+      )
+      
+  }
+  
+
+
+}
+  
 
   

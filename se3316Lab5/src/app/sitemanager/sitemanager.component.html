@@ -1,44 +1,40 @@
-Add Song:
-<br>
-<div class="play-container">
-    <p>
-        Title: <input type="text" [(ngModel)]="title"><br>
-       
-        Artist: <input type="text" [(ngModel)]="artist"><br>
-      
-        Genre: <input type="text" [(ngModel)]="genre"><br>
-    </p>
-</div>
-<button (click)="createSong()">Post Item</button>
+<h3>DMCA Workflow and Tools</h3>
+
+    <h4>To Log & Update DMCA Dispute</h4>
+    <ol>
+        <li>Log into your sitemananger account</li>
+        <li>Fill in the required fields for the dispute</li>
+        <li>Press the log dispute button and the dispute will be logged</li>
+        <li>To update fill in the field along with the copyright ID associated with the dispute and press the update dispute button</li>
+    </ol>
+    
+    <h4>To Enable/Disable DMCA Disputed Songs</h4>
+    <ol>
+        <li>Enter the ID of the song you wish to enable or disable</li>
+        <li>Click the Enable/Disable Button</li>
+        <li>This will enable a disabled song and disable an enabled song</li>
+    </ol>
+
+
+
+Activate/Deactivate Song:
 <br>
 <div class="play-container">
     <p>
         Song Id: <input type="text" [(ngModel)]="songid"><br>
     </p>
 </div>
-<br>
-Modify Song Genre:
-<br>
-<div class="play-container">
-    <p>
-        Genre: <input type="text" [(ngModel)]="put_genre"><br>
-    </p>
-</div>
+
+
+
 <button (click)="updateSong()">Update</button>
 <br>
-Delete Song:
-<br>
-
-<button (click)="deleteSong()">Delete Item</button>
 
 <br>
-
-
-<br>
-Deactivate User
+Make User Sitemanager
 <div class="play-container">
     <p>
         User Id: <input type="text" [(ngModel)]="userid"><br>
     </p>
 </div>
-<button (click)="deactivateUser()">Deactivate User</button>
+<button (click)="toggleUser()">Deactivate User</button>
