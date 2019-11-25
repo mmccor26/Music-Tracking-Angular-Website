@@ -13,12 +13,9 @@ module.exports = function(req, res, next) {
   try {
     console.log('Authed');
     //if can verify the token, set req.user and pass to next middleware
-    const decoded = jwt.verify(token, config.get("myprivatekey"));
+    const decoded = jwt.verify(token, config.get("key"));
+    console.log(decoded);
     
-    if(decoded.sitemanager===false){
-      res.send("User is not a sitemanger");
-    }
-    req.user = decoded;
     next();
   } catch (ex) {
     
