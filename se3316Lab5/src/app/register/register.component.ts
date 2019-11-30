@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { EmailValidator } from '@angular/forms';
 import { EmailvalidationService } from '../emailvalidation.service';
-
+interface LooseObject {
+  [key: string]: any
+}
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -10,6 +12,8 @@ import { EmailvalidationService } from '../emailvalidation.service';
 export class RegisterComponent implements OnInit {
   email:string='';
   password:string='';
+  response:LooseObject=null;
+  SM:string=localStorage.getItem('SM');
   constructor(private EmailvalidationService:EmailvalidationService) { }
 
   ngOnInit() {
@@ -17,8 +21,12 @@ export class RegisterComponent implements OnInit {
   registerUser():void{
     console.log("Clicked");
     this.EmailvalidationService.registerUser(this.email,this.password).subscribe(
-      (val) => {
-        console.log("POST call successful value returned in body", val);
+      data => {
+        this.response = data;
+        console.log("POST call successful value returned in body", this.response);
+        if(this.response.name==="MongoError"){
+            alert("Email already taken");
+        }
     },
     err=>{
       alert('err');

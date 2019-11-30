@@ -1,5 +1,8 @@
 <p>login works!</p>
+
 <input type="text" placeholder="Username"  [(ngModel)]="email">
 <br>
 <input type="text" placeholder="Password" [(ngModel)]="password">
-<button (click)="validateEmail()">Submit</button>
+<button (click)="validateEmail()">Login As User</button>
+<button (click)="loginSM()">Login As Sitemanger</button>
+<h4 *ngIf="SM=='true'">SM Priviledges</h4>
