@@ -22,7 +22,7 @@ const AuthAdmin = require('./middleware/AuthAdmin');
 const config = require("config");
 var passport     = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var FacebookStrategy = require('passport-facebook').Strategy;
+
 var mailer = require('./config/nodemailer');
 
 var corsOptions = {
@@ -68,25 +68,15 @@ router.get('/', function(req, res) {
 
 var mongoose   = require('mongoose');
 
-var Song     = require('./app/song');
-var Playlist     = require('./app/playlist');
+var Song     = require('./app/song');           //Mongoose Schemas
 var Review     = require('./app/review');
 var User     = require('./app/user');
-
+var DMCA    = require('./app/DMCA');
+var Privacy = require('./app/Privacy');
 mongoose.connect('mongodb://localhost:27017/items');
 
-passport.use(new FacebookStrategy({
-    clientID:3058313284185519,
-    clientSecret:'2f7a6c18c8ff4cca35ef293c3c5a7991',
-    callbackURL:"http://localhost:8080/facebook/login"
-    
-},
-function(accessToken,refreshToken,profile,cb){
-    
-    return cb(null,profile);
-    
-}
-));
+
+
 
 passport.use(new LocalStrategy({
     usernameField: 'email'
@@ -140,6 +130,14 @@ router.route("/register")
       res.status(400).json({message:"Missing info"});
       return;
     }
+    /*User.find({email:req.body.email})
+    .exec(function(err,user){
+        if(user!=null){
+            res.end("User already exists");
+            return;
+        }
+    });*/
+    
     let user = new User();
     
     user.email = req.body.email;
@@ -150,12 +148,126 @@ router.route("/register")
     user.sitemanager = false;
     
      user.save(function(err) {
-            if (err)
-                res.send(err);
-
-            res.json({ message: 'User created!' });
+            if (err){
+                console.log(err);
+                res.json(err);
+                return;
+            }
+            else{
+                res.json({ message: 'User created!' });
+                mailer.sendMail(user.email,`http://3.82.99.92:8080/api/user/activate/${user._id}`);
+            }
+            
         });
-        mailer.sendMail(user.email,`http://3.82.99.92:8080/api/user/activate/${user._id}`);
+        
+    
+});
+router.route('/sitemanager/Privacy')
+.get(function(req, res) {
+    Privacy.find(function(err, privacy) {
+        if(err){
+            res.send(err);
+        }
+        res.json(privacy);
+    })
+})
+.put(function(req, res) {
+    Privacy.findOne(function(err, privacy) {
+        if(err){
+            res.send(err);
+        }
+        privacy.text = req.body.text;
+        
+        privacy.save(function(err){
+            if(err){
+                res.send(err);
+            }
+            res.json(privacy);
+        })
+    })
+})
+.post(function(req, res) {
+    var privacy = new Privacy();
+    privacy.text = req.body.text;
+    privacy.save(function(err) {
+        if (err)
+            res.send(err);
+
+        res.json({ message: 'Privacy Policy created!' });
+    });
+})
+router.route('/sitemanager/DMCA')
+.get(function(req, res) {
+    DMCA.find(function(err, dmca) {
+        if(err){
+            res.send(err);
+        }
+        res.json(dmca);
+    })
+})
+.put(function(req, res) {
+    DMCA.findOne(function(err, dmca) {
+        if(err){
+            res.send(err);
+        }
+        dmca.text = req.body.text;
+        
+        dmca.save(function(err){
+            if(err){
+                res.send(err);
+            }
+            res.json(dmca);
+        })
+    })
+})
+.post(function(req, res) {
+    var dmca = new DMCA();
+    dmca.text = req.body.text;
+    dmca.save(function(err) {
+        if (err)
+            res.send(err);
+
+        res.json({ message: 'DMCA created!' });
+    });
+})
+router.route('/sitemanager/login')
+.post(function(req, res) {
+      console.log(req.body.email);
+    console.log(req.body.password);
+    
+passport.authenticate('local', function(err, user, info){
+    
+       if(err){
+         //something went wrong
+         res.status(404).json(err);
+         return;
+       }
+       
+       console.log(user);
+       if(user){
+          if(!user.activated){
+              console.log('not activated')
+              
+            //user has not yet visited the activation link
+            res.json({message:"account locked"});
+          }else{
+              if(user.sitemanager===true){
+                const token = user.generateAdminToken();
+                console.log(token);
+                res.header("authorization", token).send({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                sitemanager: user.sitemanager,
+                token:token
+                });
+              }
+          }
+        }
+        else{
+           res.status(401).json(info);
+       }
+       })(req,res);
     
 });
 router.route('/login')
@@ -180,7 +292,7 @@ passport.authenticate('local', function(err, user, info){
             res.json({message:"account locked"});
           }else{
               console.log('logged in');
-              if(!user.sitemanager){
+              
                 const token = user.generateAuthToken();
                 console.log(token);
                 res.header("authorization", token).send({
@@ -191,19 +303,6 @@ passport.authenticate('local', function(err, user, info){
                 token:token
                 });
                 
-              }
-              if(user.sitemanager){
-                 const token = user.generateAdminToken();
-                 console.log(token);
-                res.header("authorization", token).send({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                sitemanager: user.sitemanager,
-                token:token
-                });
-              }
-                
          }
        }
        else{
@@ -211,19 +310,7 @@ passport.authenticate('local', function(err, user, info){
        }
     })(req,res);//make sure you call the function
 });
-router.route('/facebook/login')
-.post(function(req,res){
-    
-    console.log(req.body.email);
-    console.log(req.body.password);
-    
-passport.authenticate('facebook',
-  function(req, res) {
-      console.log('success');
-    res.redirect('/');
-      
-  })
-});
+
 router.route('/songlist')
 .get(function(req, res) {
     
@@ -264,7 +351,7 @@ router.route('/songs')
             song.year = req.body.year;
         }
         song.hidden = false;
-        if(req.body.reviewer !=null && req.body.reviewtext!=null && req.body.rating !=null){
+        if(req.body.reviewer !='' && req.body.reviewtext!='' && req.body.rating !=null){
             var review = new Review();
             review.song_id = song._id;
             review.username = req.body.reviewer;
@@ -290,12 +377,6 @@ router.route('/songs')
     });
 router.route('/song/:keyword')
     .get(function(req, res) {
-        /*Song.find({$or:[{title:req.params.keyword},
-            {artist:req.params.keyword},
-            {genre:req.params.keyword}]},
-            function(err, songs) {
-                res.json(songs);
-            })*/
         
         Song.find(function(err, songs) {
             var filteredSongs = songs.filter(function(i) {
