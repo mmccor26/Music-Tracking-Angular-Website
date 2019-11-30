@@ -2,7 +2,7 @@
 
 var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
-var crypto       = require('crypto');
+var bcrypt       = require('bcrypt');
 const config = require('config');
 const jwt = require('jsonwebtoken');
 
@@ -10,10 +10,6 @@ var UserSchema   = new Schema({
     email:{
         type:String,
         unique:true,
-        required:true
-    },
-    name:{
-        type:String,
         required:true
     },
     
@@ -24,19 +20,25 @@ var UserSchema   = new Schema({
    
 });
 UserSchema.methods.validatePassword = function(pwd){
-    let hash = crypto.pbkdf2Sync(pwd,this.salt,1000,64,'sha512').toString("hex");
-    return this.hash === hash;
+    return bcrypt.compareSync(pwd, this.hash);
 }
 UserSchema.methods.makePassword = function(pwd){
-    this.salt = crypto.randomBytes(16).toString('hex');
-   
-    this.hash = crypto.pbkdf2Sync(pwd, this.salt, 1000, 64, 'sha512').toString('hex');
+    
+    this.hash = bcrypt.hashSync(pwd, 10);
+    console.log("hash "+this.hash);
+
 }
 
 UserSchema.methods.generateAuthToken = function(){
     const token = jwt.sign({_id:this._id,isAdmin:this.sitemanager},
     config.get('myprivatekey'));
-    console.log(token.sitemanager);
+   
+    return token;
+}
+UserSchema.methods.generateAdminToken = function(){
+    const token = jwt.sign({_id:this._id,isAdmin:this.sitemanager},
+    config.get('key'));
+   
     return token;
 }
 module.exports = mongoose.model('User', UserSchema);

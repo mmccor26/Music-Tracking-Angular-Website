@@ -66,18 +66,12 @@ router.get('/', function(req, res) {
     res.json({ message: 'hooray! welcome to our api!' });   
 });
 
-// more routes for our API will happen here
-
-
 var mongoose   = require('mongoose');
 
 var Song     = require('./app/song');
 var Playlist     = require('./app/playlist');
 var Review     = require('./app/review');
 var User     = require('./app/user');
-
-var nev = require('email-verification')(mongoose);
-
 
 mongoose.connect('mongodb://localhost:27017/items');
 
@@ -98,7 +92,7 @@ passport.use(new LocalStrategy({
     usernameField: 'email'
 },
     function(username, password, done){
-        console.log('hi');
+        
         User.findOne({email: username}, function(err, user){
             if(err){
                 
@@ -110,6 +104,8 @@ passport.use(new LocalStrategy({
                 });
             }
             if(!user.validatePassword(password)){
+                console.log("hi");
+                console.log("password "+password);
                 return done(null, false, {
                     message: "Password is wrong"
                 });
@@ -139,7 +135,7 @@ router.get('/', function(req, res) {
 
 router.route("/register")
 .post(function(req,res){
-    if(!req.body.name||!req.body.email||!req.body.password){
+    if(!req.body.email||!req.body.password){
       //request does not have the information to make a new user
       res.status(400).json({message:"Missing info"});
       return;
@@ -147,7 +143,7 @@ router.route("/register")
     let user = new User();
     
     user.email = req.body.email;
-    user.name = req.body.name;
+    console.log("plain password"+req.body.password);
     user.makePassword(req.body.password);
     //User must click link to activate account
     user.activated = false; 
@@ -159,7 +155,7 @@ router.route("/register")
 
             res.json({ message: 'User created!' });
         });
-        mailer.sendMail(user.email,`http://18.212.196.17:8080/api/user/activate/${user._id}`);
+        mailer.sendMail(user.email,`http://3.82.99.92:8080/api/user/activate/${user._id}`);
     
 });
 router.route('/login')
@@ -168,7 +164,7 @@ router.route('/login')
     console.log(req.body.password);
     
 passport.authenticate('local', function(err, user, info){
-        console.log(info);
+        
 
        if(err){
          //something went wrong
@@ -184,16 +180,30 @@ passport.authenticate('local', function(err, user, info){
             res.json({message:"account locked"});
           }else{
               console.log('logged in');
-              const token = user.generateAuthToken();
-              console.log(token);
-              console.log(token.isAdmin);
-              console.log(user.sitemanager);
+              if(!user.sitemanager){
+                const token = user.generateAuthToken();
+                console.log(token);
                 res.header("authorization", token).send({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                sitemanager: user.sitemanager
+                sitemanager: user.sitemanager,
+                token:token
                 });
+                
+              }
+              if(user.sitemanager){
+                 const token = user.generateAdminToken();
+                 console.log(token);
+                res.header("authorization", token).send({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                sitemanager: user.sitemanager,
+                token:token
+                });
+              }
+                
          }
        }
        else{
@@ -214,10 +224,18 @@ passport.authenticate('facebook',
       
   })
 });
+router.route('/songlist')
+.get(function(req, res) {
+    
+    Song.find(function(err, songs) {
+    
+        res.json(songs);
+    })
+})
 router.route('/songs')
     .get(function(req, res) {
         Song
-        .find()
+        .find({hidden:false})
         .sort({avgrating:-1})
         .limit(10)
         .exec(function(err, songs) {
@@ -225,11 +243,10 @@ router.route('/songs')
         });
     })
     .post(function(req, res) {
-
+        
         var song = new Song();     
         song.title = sanitizeName(req.body.title);  
         song.artist = sanitizeName(req.body.artist);
-        console.log(req.body.genre);
         song.numberofratings = 0;
         song.avgrating = 0;
         song.header = "TAG";
@@ -239,17 +256,30 @@ router.route('/songs')
         if(req.body.album !=null){
             song.album = req.body.album;
         }
-        console.log(req.body.songcomment);
     
         if(req.body.songcomment !=null){
             song.songcomment = req.body.songcomment;
         }
-        console.log(song.songcomment);
         if(req.body.year !=null){
             song.year = req.body.year;
         }
         song.hidden = false;
-        
+        if(req.body.reviewer !=null && req.body.reviewtext!=null && req.body.rating !=null){
+            var review = new Review();
+            review.song_id = song._id;
+            review.username = req.body.reviewer;
+            review.text = req.body.reviewtext;
+            review.rating = req.body.rating;
+            song.avgrating = req.body.rating;
+            song.numberofratings = 1;
+            song.lastreview.push(review);
+            
+            review.save(function(err){
+               if(err){
+                   console.log(err);
+               } 
+            });
+        }
         song.save(function(err) {
             if (err)
                 res.send(err);
@@ -339,8 +369,9 @@ router.route('/reviews')
         console.log(req.body.genre);
         review.rating = req.body.rating;
         Song.findById(review.song_id,function(err, song) {
-            
             song.numberofratings +=1;
+            song.lastreview.pop();
+            song.lastreview.push(review);
             console.log("current average "+song.avgrating);
             console.log("current avg time number of ratings "+song.numberofratings*song.avgrating);
             console.log("new ratings "+req.body.rating);
@@ -398,9 +429,21 @@ router.route('/review/:song_id')
         });
     
 });
+router.route('/review/mostrecentreview/:song_id')
+.get(function(req, res) {
+    Review.find({song_id:req.params.song_id})
+    .sort({_id:-1})
+    .limit(1)
+    .exec(function(err, review) {
+        res.json(review);
+    });
+})
 
 router.route('/users')
     .get(AuthAdmin,function(req, res) {
+        if(!req.isAdmin){
+            console.log('Not admin')
+        }
         User.find(function(err, users) {
             if (err)
                 res.send(err);
@@ -463,15 +506,8 @@ router.route('/user/:user_id')
            
       
         User.findById(req.params.user_id, function(err, user) {
-            if(user.activated!=null){
-                user.activated = req.body.activated;
-        
-            }
-            user.activated=true;
-            if(user.sitemanager!=null){
-                
-                user.sitemanager = req.body.sitemanager;
-            }
+            //user.activated = !user.activated;
+            user.sitemanager =true;
             
             // save the item
             user.save(function(err) {
@@ -495,7 +531,7 @@ router.route('/user/:user_id')
     });
     
 router.route('/admin/song/:song_id')
-.put(function(req,res){
+.put(AuthAdmin,function(req,res){
     Song.findById(req.params.song_id,function(err, song) {
         song.hidden= !song.hidden;
         song.save(function(err) {

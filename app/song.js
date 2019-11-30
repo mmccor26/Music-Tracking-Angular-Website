@@ -1,6 +1,7 @@
 // JavaScript File
 var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
+var review       = require('./review');
 
 var SongSchema   = new Schema({
     header:{
@@ -44,6 +45,9 @@ var SongSchema   = new Schema({
     avgrating:{
         type:Number,
         required:true
+    },
+    lastreview:{
+        type: [Schema.Types.Review]
     }
 });
 
