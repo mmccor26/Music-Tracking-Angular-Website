@@ -9,12 +9,12 @@
   <li *ngFor="let songList of songList;index as i">
     <p class="name">ID: {{ songList._id }}</p>
     <p class="name">Name: {{ songList.title }}</p>
-    <p class="name">Text: {{ songList.artist }}</p>
+    <p class="name">Artist: {{ songList.artist }}</p>
     <p class="name"> Average Rating: {{ songList.avgrating }}</p><button (click)="listToggle[i]=true">+</button>
-    <p *ngIf="listToggle[i]">Year: {{songList.album}}</p>
+    <p *ngIf="listToggle[i]">Album: {{songList.album}}</p>
     <p *ngIf="listToggle[i]">Number of Ratings: {{songList.numberofratings}}</p>
     <p *ngIf="listToggle[i]">Genre: {{songList.genre}}</p>
-    <p *ngIf="listToggle[i]">Year: {{songList.album}}</p>
+    <p *ngIf="listToggle[i]">Year: {{songList.year}}</p>
     <p *ngIf="listToggle[i] && songList.lastreview[0]">Last Reviewer: {{songList.lastreview[0].username}}</p>
     <p *ngIf="listToggle[i] && songList.lastreview[0]">Comment: {{songList.lastreview[0].text}}</p>
     <p *ngIf="listToggle[i] && songList.lastreview[0]">Rating: {{songList.lastreview[0].rating}}</p>
@@ -66,6 +66,11 @@ Find All Reviews For A Song:
         Album: <input type="text" [(ngModel)]="album"><br>
         Comment: <input type="text" [(ngModel)]="comment"><br>
         Year: <input type="text" [(ngModel)]="year"><br>
+        Want to Add A Review Too? Fill These In Too Then
+        <br>
+        Username: <input type="text" [(ngModel)]="reviewusername"><br>
+        Comment: <input type="text" [(ngModel)]="reviewcomment"><br>
+        Rating: <input type="text" [(ngModel)]="songrating"><br>
     </p>
     <button (click)="createSong()">Post Song</button>
 </div>
@@ -82,3 +87,4 @@ Find All Reviews For A Song:
   </p>
   <button (click)="createReview()">Post Review</button>
 </div>
+<h4 *ngIf="SM=='true'">SM Priviledges</h4>
