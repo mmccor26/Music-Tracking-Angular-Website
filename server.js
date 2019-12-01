@@ -352,7 +352,7 @@ router.route('/songs')
             res.json(songs);
         });
     })
-    .post(function(req, res) {
+    .post(auth,function(req, res) {
         
         var song = new Song();     
         song.title = sanitizeName(req.body.title);  
@@ -462,7 +462,7 @@ router.route('/reviews')
             res.json(reviews);
         });
     })
-    .post(function(req, res) {
+    .post(auth,function(req, res) {
 
         var review = new Review();     
         review.text = sanitizeName(req.body.text);  

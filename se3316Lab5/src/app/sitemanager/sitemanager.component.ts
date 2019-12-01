@@ -20,6 +20,7 @@ export class SitemanagerComponent implements OnInit {
   text:string='';
   date:Date;
   noticeType:string='';
+  SM:string=localStorage.getItem('SM');
   
 
 
