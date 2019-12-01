@@ -55,7 +55,7 @@ console.log(config.get("myprivatekey"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var port = process.env.PORT || 8080;        // set our port
+var port = process.env.PORT || 8081;        // set our port
 
 // ROUTES FOR OUR API
 // =============================================================================
@@ -73,6 +73,7 @@ var Review     = require('./app/review');
 var User     = require('./app/user');
 var DMCA    = require('./app/DMCA');
 var Privacy = require('./app/Privacy');
+var Copyright = require('./app/Copyright');
 mongoose.connect('mongodb://localhost:27017/items');
 
 
@@ -171,7 +172,7 @@ router.route('/sitemanager/Privacy')
         res.json(privacy);
     })
 })
-.put(function(req, res) {
+.put(AuthAdmin,function(req, res) {
     Privacy.findOne(function(err, privacy) {
         if(err){
             res.send(err);
@@ -196,6 +197,28 @@ router.route('/sitemanager/Privacy')
         res.json({ message: 'Privacy Policy created!' });
     });
 })
+router.route('/sitemanager/Copyright')
+.get(function(req, res) {
+    Copyright.find(function(err, copy) {
+        if(err){
+            res.send(err);
+        }
+        res.json(copy);
+        
+    })
+})
+.post(AuthAdmin,function(req, res) {
+    var copyright = new Copyright();
+    copyright.text = req.body.text;
+    copyright.date = req.body.date;
+    copyright.song_id = req.body.song_id;
+    copyright.noticeType = req.body.noticeType;
+    copyright.save(function(err){
+        if(err){res.send(err);}
+        res.json("Notice Logged");
+        
+    })
+})
 router.route('/sitemanager/DMCA')
 .get(function(req, res) {
     DMCA.find(function(err, dmca) {
@@ -205,7 +228,7 @@ router.route('/sitemanager/DMCA')
         res.json(dmca);
     })
 })
-.put(function(req, res) {
+.put(AuthAdmin,function(req, res) {
     DMCA.findOne(function(err, dmca) {
         if(err){
             res.send(err);
@@ -344,9 +367,7 @@ router.route('/songs')
             song.album = req.body.album;
         }
     
-        if(req.body.songcomment !=null){
-            song.songcomment = req.body.songcomment;
-        }
+        
         if(req.body.year !=null){
             song.year = req.body.year;
         }
@@ -575,14 +596,7 @@ router.route('/user/activate/:user_id')
 });
 router.route('/user/:user_id')
 
-    .get(function(req, res) {
-
-    User.findById(req.params.playlist_id, function(err, user) {
-            if (err)
-                res.send(err);
-            res.json(user);
-        });
-    })
+   
       .put(function(req, res) {
            
       
@@ -600,7 +614,7 @@ router.route('/user/:user_id')
 
         });
     })
-    .delete(function(req, res) {
+    .delete(AuthAdmin,function(req, res) {
         User.remove({
             _id: req.params.user_id
         }, function(err, song) {
@@ -624,6 +638,23 @@ router.route('/admin/song/:song_id')
     })
     
 });
+router.route('/admin/activate/:user_id')
+.put(AuthAdmin,function(req,res){
+    User.findById(req.params.user_id,function(err,user){
+    
+            user.activated=!user.activated;
+            user.save(function(err){
+                if(err){
+                    res.status(405).json(err);
+                }
+                else{
+                    res.json("account activation changed!");
+                }
+            });
+        
+    });
+});
+
 
 
     // REGISTER OUR ROUTES -------------------------------

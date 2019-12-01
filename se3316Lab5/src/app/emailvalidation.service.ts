@@ -16,13 +16,16 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class EmailvalidationService {
-  url:string='http://3.86.209.249:8080/api';
+  url:string='http://'+window.location.hostname+':8080/api';
 
   constructor(private http:HttpClient) { }
   validateEmail(email,password){
     if (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)=== false){
       alert("You have entered an invalid email address!");
       return;
+    }
+    if(password===''){
+      alert("Please fill in a password");
     }
     
     return this.http.post(this.url+'/login',

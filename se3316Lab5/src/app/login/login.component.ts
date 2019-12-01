@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
         else{
           console.log("POST call successful value returned in body", this.response.token);
           localStorage.setItem('token',this.response.token.toString());
-          localStorage.setItem('SM','true');
+         
           localStorage.setItem('loggedIn','true');
           alert("Logged In!");
           

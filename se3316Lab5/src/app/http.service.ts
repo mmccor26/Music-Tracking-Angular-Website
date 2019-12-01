@@ -10,7 +10,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class HttpService {
-  url:string='http://3.86.209.249:8080/api';
+  url:string='http://'+window.location.hostname+':8080/api';
 
 
   constructor(private http:HttpClient) { }
@@ -45,6 +45,25 @@ export class HttpService {
     +"&"+encodeURIComponent("text")+'='+encodeURIComponent(text)
     +"&"+encodeURIComponent("rating")+'='+encodeURIComponent(rating)
     +"&"+encodeURIComponent("song_id")+'='+encodeURIComponent(songid),
+
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("POST Request is successful ", data);
+      window.location.reload();
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
+  logCopyright(copy_songid,date,text,noticeType){
+    return this.http.post(this.url+'/sitemanager/Copyright/',
+    encodeURIComponent("song_id")+'='+encodeURIComponent(copy_songid)
+    +"&"+encodeURIComponent("date")+'='+encodeURIComponent(date)
+    +"&"+encodeURIComponent("text")+'='+encodeURIComponent(text)
+    +"&"+encodeURIComponent("noticeType")+'='+encodeURIComponent(noticeType),
 
     httpOptions)
     .subscribe(
@@ -115,8 +134,22 @@ export class HttpService {
       
       });
   }
-  deactivateUser(this_userid){
+  makeSitemanagerUser(this_userid){
     return this.http.put(this.url+'/user/'+
+    this_userid,
+    httpOptions)
+    .subscribe(
+      data  => {
+      console.log("PUT Request is successful ", data);
+      },
+      error  => {
+      
+      console.log("Error", error);
+      
+      });
+  }
+  toggleUser(this_userid){
+    return this.http.put(this.url+'/admin/activate/'+
     this_userid,
     httpOptions)
     .subscribe(
@@ -136,6 +169,8 @@ export class HttpService {
     return this.http.get(this.url+'/song/'+keyword);
   }
   getSongList(){
+    console.log(this.url);
+    console.log(window.location);
     return this.http.get(this.url+'/songs');
   }
   getDMCA(){

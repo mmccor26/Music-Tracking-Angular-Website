@@ -16,6 +16,13 @@ export class SitemanagerComponent implements OnInit {
   playlistid:string='';
   put_genre:string='';
   userid:string='';
+  copy_songid:string='';
+  text:string='';
+  date:Date;
+  noticeType:string='';
+  
+
+
   constructor(private HttpService:HttpService) { }
 
   ngOnInit() {
@@ -24,8 +31,14 @@ export class SitemanagerComponent implements OnInit {
   updateSong():void{
     this.HttpService.updateSong(this.songid);
   }
+  makeSitemager():void{
+    this.HttpService.makeSitemanagerUser(this.userid);
+  }
   toggleUser():void{
-    this.HttpService.deactivateUser(this.userid);
+    this.HttpService.toggleUser(this.userid);
+  }
+  logCopyright():void{
+    this.HttpService.logCopyright(this.copy_songid,this.date,this.text,this.noticeType);
   }
 
 

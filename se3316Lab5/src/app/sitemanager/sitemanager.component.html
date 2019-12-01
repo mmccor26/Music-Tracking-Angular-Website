@@ -31,10 +31,25 @@ Activate/Deactivate Song:
 <br>
 
 <br>
-Make User Sitemanager
+User Controls
 <div class="play-container">
     <p>
         User Id: <input type="text" [(ngModel)]="userid"><br>
     </p>
 </div>
-<button (click)="toggleUser()">Deactivate User</button>
+<button (click)="makeSitemager()">Make Sitemanager</button>
+<button (click)="toggleUser()">Activate/Deactivate</button>
+<br>
+Log Infringement Notices, Takedown Requests and Dispute Claims
+<div class="play-container">
+    <p>
+        Song Id: <input type="text" [(ngModel)]="copy_songid"><br>
+        Date: <input type="date" [(ngModel)]="date"><br>
+        Text: <input type="text" [(ngModel)]="text"><br>
+        Types are Infringement Notice, Takedown Request or Dispute Claim
+        <br>
+        Type: <input type="text" [(ngModel)]="noticeType"><br>
+    </p>
+    <button (click)="logCopyright()">Log</button>
+</div>
+
